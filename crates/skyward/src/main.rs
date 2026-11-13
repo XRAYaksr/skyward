@@ -542,6 +542,9 @@ fn bring_up(cfg: &DeviceConfig, slot: skyward_vab::Slot) -> Result<()> {
     if let Some(dir) = &libraries {
         skyward_sys::kmsg(&format!("the phone's own libraries are at {}", dir.display()))?;
     }
+    if !Path::new("/system/bin/servicemanager").exists() {
+        skyward_binder::parcel::use_system_header();
+    }
     services::start(&services, libraries.as_deref())?;
     agree_on_the_notes_key(&registering)
 }

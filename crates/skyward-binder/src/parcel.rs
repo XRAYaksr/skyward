@@ -1,9 +1,25 @@
 use anyhow::{bail, Context, Result};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 /// The mark libbinder writes into every call header. Both ends have to agree
 /// on it: it tells apart the copies of libbinder a phone carries, and the one
 /// the recovery's own programs are built from is the recovery copy.
 const HEADER: i32 = i32::from_be_bytes(*b"RECO");
+/// The mark used when the phone's servicemanager runs from the installed
+/// system rather than the recovery image.
+const SYSTEM_HEADER: i32 = i32::from_be_bytes(*b"SYS!");
+
+static USE_SYSTEM_HEADER: AtomicBool = AtomicBool::new(false);
+
+/// Switch outgoing binder call headers to the installed system's `SYS!` mark
+/// when recovery delegates service management to the system's `servicemanager`.
+pub fn use_system_header() {
+    USE_SYSTEM_HEADER.store(true, Ordering::Relaxed);
+}
+
+fn call_header() -> i32 {
+    if USE_SYSTEM_HEADER.load(Ordering::Relaxed) { SYSTEM_HEADER } else { HEADER }
+}
 
 /// Strict mode gathers violations rather than acting on them; a caller with
 /// no policy of its own still sets that bit.
@@ -50,7 +66,7 @@ impl Parcel {
         let mut p = Parcel::default();
         p.i32(STRICT_MODE_PENALTY_GATHER);
         p.i32(UNSET_WORK_SOURCE);
-        p.i32(HEADER);
+        p.i32(call_header());
         p.string(interface);
         p
     }
