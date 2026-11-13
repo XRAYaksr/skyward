@@ -107,7 +107,7 @@ groups = ["system", "readproc"]
 # wrapped in hardware.
 [[service]]
 path = "/vendor/bin/hw/android.hardware.security.keymint-service-qti"
-libraries = ["/system/lib64", "/vendor/lib64"]
+libraries = ["/mnt/system/system/lib64/bootstrap", "/mnt/system/system/lib64", "/vendor/lib64"]
 ready_service = "android.hardware.security.keymint.IKeyMintDevice/default"
 user = "system"
 groups = ["system", "drmrpc"]
@@ -150,7 +150,8 @@ firmware = [
 ]
 interface = "wlan0"
 supplicant = "/vendor/bin/hw/wpa_supplicant"
-libraries = ["/vendor/lib64", "/system/lib64"]
+libraries = ["/vendor/lib64", "/mnt/system/system/lib64/bootstrap", "/mnt/system/system/lib64"]
+preload = ["/apex/com.android.vndk.v31/lib64/libcrypto.so", "/apex/com.android.vndk.v31/lib64/libssl.so"]
 service = "android.hardware.wifi.supplicant.ISupplicant/default"
 probe = "http://connect.rom.miui.com/generate_204"
 

@@ -728,10 +728,14 @@ fn start_supplicant(cfg: &Config, libraries: Option<&Path>) -> Result<Child> {
     if let Some(dir) = libraries {
         path.push(dir.to_string_lossy().into_owned());
     }
-    let mut child = Process::new(&cfg.supplicant)
-        .args(["-i", &cfg.interface, "-D", "nl80211", "-c"])
+    let mut cmd = Process::new(&cfg.supplicant);
+    cmd.args(["-i", &cfg.interface, "-D", "nl80211", "-c"])
         .arg(&settings)
-        .env("LD_LIBRARY_PATH", path.join(":"))
+        .env("LD_LIBRARY_PATH", path.join(":"));
+    if !cfg.preload.is_empty() {
+        cmd.env("LD_PRELOAD", cfg.preload.join(":"));
+    }
+    let mut child = cmd
         .current_dir("/")
         .stdin(Stdio::null())
         .stdout(Stdio::null())

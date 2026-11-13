@@ -122,6 +122,10 @@ pub struct Wlan {
     /// the libraries of the vendor interface the phone was built against.
     #[serde(default)]
     pub libraries: Vec<String>,
+    /// Shared libraries to preload via LD_PRELOAD before resolving symbols
+    /// from LD_LIBRARY_PATH (e.g. VNDK libs shadowed by newer system libs).
+    #[serde(default)]
+    pub preload: Vec<String>,
     /// The service it registers with the service directory as it starts,
     /// which the directory takes only from a program the running system
     /// describes.
