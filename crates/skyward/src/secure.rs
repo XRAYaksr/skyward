@@ -130,6 +130,10 @@ pub fn prepare_hardware_directory(wanted: &[String]) -> Result<()> {
     fs::set_permissions(RECOVERY_LABELS, std::os::unix::fs::PermissionsExt::from_mode(0o755))
         .with_context(|| format!("open {RECOVERY_LABELS} to every user"))?;
     fs::copy(from, &into).with_context(|| format!("copy {} to {}", from.display(), into.display()))?;
+    let manifest_dir = Path::new(RECOVERY_MANIFEST).parent().expect("manifest is in a folder");
+    fs::create_dir_all(manifest_dir).with_context(|| format!("make {}", manifest_dir.display()))?;
+    fs::set_permissions(manifest_dir, std::os::unix::fs::PermissionsExt::from_mode(0o755))
+        .with_context(|| format!("open {} to every user", manifest_dir.display()))?;
     fs::write(RECOVERY_MANIFEST, describe_hardware(wanted)?).with_context(|| format!("write {RECOVERY_MANIFEST}"))?;
     fs::set_permissions(RECOVERY_MANIFEST, std::os::unix::fs::PermissionsExt::from_mode(0o644))
         .with_context(|| format!("let every user read {RECOVERY_MANIFEST}"))?;
