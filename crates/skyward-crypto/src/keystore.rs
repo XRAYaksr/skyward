@@ -70,7 +70,11 @@ impl StoredKey {
             bail!("{} is written in layout {}, Skyward reads layout {VERSION}", dir.display(), version.trim());
         }
         if dir.join(FN_STRETCHING).exists() {
-            bail!("{} was written by an Android too old for Skyward to read", dir.display());
+            let stretching = fs::read_to_string(dir.join(FN_STRETCHING))
+                .with_context(|| format!("read {}", dir.join(FN_STRETCHING).display()))?;
+            if stretching.trim() != "nopassword" {
+                bail!("{} was written by an Android too old for Skyward to read", dir.display());
+            }
         }
         let secdiscardable_hash = match dir.join(FN_SECDISCARDABLE).exists() {
             true => hash_with_prefix(SECDISCARDABLE_PREFIX, &read(FN_SECDISCARDABLE)?),

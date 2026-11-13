@@ -152,7 +152,7 @@ firmware = [
 interface = "wlan0"
 supplicant = "/vendor/bin/hw/wpa_supplicant"
 libraries = ["/vendor/lib64", "/mnt/system/system/lib64/bootstrap", "/mnt/system/system/lib64"]
-preload = ["/apex/com.android.vndk.v31/lib64/libcrypto.so", "/apex/com.android.vndk.v31/lib64/libssl.so"]
+preload = ["/apex/com.android.vndk.v31/lib64/libcrypto.so", "/apex/com.android.vndk.v31/lib64/libssl.so", "/apex/com.android.vndk.v31/lib64/libhidlbase.so"]
 service = "android.hardware.wifi.supplicant@1.4::ISupplicant/default"
 probe = "http://connect.rom.miui.com/generate_204"
 
