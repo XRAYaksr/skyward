@@ -71,4 +71,8 @@ int32_t AParcel_writeStatusHeader(void *parcel, const void *status) { (void)parc
 void *AStatus_newOk(void) { return (void *)1; }
 void *AStatus_fromStatus(int32_t status) { (void)status; return (void *)1; }
 int AStatus_isOk(const void *status) { (void)status; return 0; }
+int32_t AStatus_getExceptionCode(const void *status) { (void)status; return -8; }
+int32_t AStatus_getServiceSpecificError(const void *status) { (void)status; return -1; }
+int32_t AStatus_getStatus(const void *status) { (void)status; return -38; }
+const char *AStatus_getMessage(const void *status) { (void)status; return ""; }
 void AStatus_delete(void *status) { (void)status; }
