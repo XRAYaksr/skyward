@@ -141,6 +141,16 @@ pub fn prepare_hardware_directory(wanted: &[String]) -> Result<()> {
     fs::set_permissions(RECOVERY_LABELS, std::os::unix::fs::PermissionsExt::from_mode(0o755))
         .with_context(|| format!("open {RECOVERY_LABELS} to every user"))?;
     fs::copy(from, &into).with_context(|| format!("copy {} to {}", from.display(), into.display()))?;
+    for extra in [
+        "/mnt/system/system/etc/selinux/plat_service_contexts",
+        "/mnt/system_ext/etc/selinux/system_ext_service_contexts",
+    ] {
+        let src = Path::new(extra);
+        if src.is_file() {
+            let dst = Path::new(RECOVERY_LABELS).join(src.file_name().expect("a named file"));
+            fs::copy(src, &dst).with_context(|| format!("copy {} to {}", src.display(), dst.display()))?;
+        }
+    }
     let manifest_dir = Path::new(RECOVERY_MANIFEST).parent().expect("manifest is in a folder");
     fs::create_dir_all(manifest_dir).with_context(|| format!("make {}", manifest_dir.display()))?;
     fs::set_permissions(manifest_dir, std::os::unix::fs::PermissionsExt::from_mode(0o755))
