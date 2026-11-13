@@ -1,7 +1,7 @@
 ![Skyward Recovery](assets/hero.jpg)
 
 # Skyward
-
+This is a ported version for Redmi K60(POCO F5 PRO) - Mondrain
 English | [简体中文](README.zh-CN.md)
 
 Skyward is a recovery written in Rust, from scratch.
