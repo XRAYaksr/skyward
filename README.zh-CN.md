@@ -1,7 +1,7 @@
 ![Skyward Recovery](assets/hero.jpg)
 
 # Skyward
-
+这是一个为Redmi K60 (POCO F5 PRO) - Mondrian 移植的版本
 [English](README.md) | 简体中文
 
 Skyward 是使用 Rust 编写的 recovery，从零开始编写。
