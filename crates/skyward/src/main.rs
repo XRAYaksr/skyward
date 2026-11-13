@@ -521,7 +521,11 @@ fn bring_up(cfg: &DeviceConfig, slot: skyward_vab::Slot) -> Result<()> {
         let handed = hand_over(&cfg.owners)?;
         skyward_sys::kmsg(&format!("{handed} of the phone's own files handed to the accounts its init gives them"))?;
     }
-    let hardware: Vec<String> = services.iter().filter_map(|s| s.ready_hardware_service.clone()).collect();
+    let mut hardware: Vec<String> = services
+        .iter()
+        .flat_map(|s| s.ready_hardware_service.iter().chain(s.registers.iter().filter(|r| r.contains('@'))).cloned())
+        .collect();
+    hardware.extend(cfg.wlan.iter().filter(|w| w.service.contains('@')).map(|w| w.service.clone()));
     if !hardware.is_empty() {
         secure::prepare_hardware_directory(&hardware)?;
         skyward_sys::kmsg("the directory for the phone's hardware services can run")?;
@@ -531,8 +535,11 @@ fn bring_up(cfg: &DeviceConfig, slot: skyward_vab::Slot) -> Result<()> {
     // registers whenever the WLAN is turned on, and the directory can no
     // longer start again by then: the key service registers with it below,
     // and nothing would register that again.
-    let mut registering: Vec<String> = services.iter().flat_map(|s| s.ready_service.iter().chain(&s.registers).cloned()).collect();
-    registering.extend(cfg.wlan.iter().map(|w| w.service.clone()));
+    let mut registering: Vec<String> = services
+        .iter()
+        .flat_map(|s| s.ready_service.iter().chain(s.registers.iter().filter(|r| !r.contains('@'))).cloned())
+        .collect();
+    registering.extend(cfg.wlan.iter().filter(|w| !w.service.contains('@')).map(|w| w.service.clone()));
     let files: Vec<String> = services.iter().filter_map(|s| s.description.clone()).collect();
     if !registering.is_empty() || !files.is_empty() {
         let described = secure::publish_descriptions(&registering, &files)?;

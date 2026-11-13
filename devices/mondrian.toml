@@ -118,6 +118,7 @@ groups = ["system", "drmrpc"]
 path = "/mnt/system_ext/bin/hwservicemanager"
 libraries = ["/mnt/system/system/lib64/bootstrap", "/mnt/system/system/lib64", "/mnt/system_ext/lib64"]
 ready_property = "hwservicemanager.ready"
+registers = ["vendor.qti.hardware.wifi.supplicant@2.2::ISupplicantVendor/default"]
 user = "system"
 groups = ["system", "readproc"]
 
@@ -152,7 +153,7 @@ interface = "wlan0"
 supplicant = "/vendor/bin/hw/wpa_supplicant"
 libraries = ["/vendor/lib64", "/mnt/system/system/lib64/bootstrap", "/mnt/system/system/lib64"]
 preload = ["/apex/com.android.vndk.v31/lib64/libcrypto.so", "/apex/com.android.vndk.v31/lib64/libssl.so"]
-service = "android.hardware.wifi.supplicant.ISupplicant/default"
+service = "android.hardware.wifi.supplicant@1.4::ISupplicant/default"
 probe = "http://connect.rom.miui.com/generate_204"
 
 # The update server the stock updater of the Chinese system asks.

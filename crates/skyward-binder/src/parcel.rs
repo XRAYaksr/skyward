@@ -6,12 +6,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 /// the recovery's own programs are built from is the recovery copy.
 const HEADER: i32 = i32::from_be_bytes(*b"RECO");
 /// The mark used when the phone's servicemanager runs from the installed
-/// system rather than the recovery image.
-const SYSTEM_HEADER: i32 = i32::from_be_bytes(*b"SYS!");
+/// system rather than the recovery image (`0x53595354`, "SYST").
+const SYSTEM_HEADER: i32 = i32::from_be_bytes(*b"SYST");
 
 static USE_SYSTEM_HEADER: AtomicBool = AtomicBool::new(false);
 
-/// Switch outgoing binder call headers to the installed system's `SYS!` mark
+/// Switch outgoing binder call headers to the installed system's `SYST` mark
 /// when recovery delegates service management to the system's `servicemanager`.
 pub fn use_system_header() {
     USE_SYSTEM_HEADER.store(true, Ordering::Relaxed);
