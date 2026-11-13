@@ -13,8 +13,9 @@ density = 560
 diagonal = 6.67
 
 [modules]
-sources = ["vendor_boot", "vendor_dlkm", "vendor"]
-# The touchscreen: Goodix GT9916 (goodix_core -> goodix_ts).
+sources = ["vendor_dlkm", "vendor", "vendor_boot"]
+unload = ["goodix_core"]
+# The touchscreen: Goodix GT9916 (xiaomi_touch + goodix_core -> goodix_ts).
 load = ["goodix_core"]
 
 # What /vendor/etc/init/vendor.xiaomi.hw.touchfeature@1.0-service.rc hands to

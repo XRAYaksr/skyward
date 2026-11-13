@@ -163,6 +163,30 @@ pub fn insmod(path: impl AsRef<Path>, params: &str) -> Result<()> {
     }
 }
 
+#[cfg(target_os = "android")]
+fn delete_module(name: &str) -> std::io::Result<()> {
+    let cname = std::ffi::CString::new(name).map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidInput, e))?;
+    let rc = unsafe { libc::syscall(libc::SYS_delete_module, cname.as_ptr(), 0 as libc::c_int) };
+    if rc != 0 {
+        return Err(std::io::Error::last_os_error());
+    }
+    Ok(())
+}
+
+#[cfg(not(target_os = "android"))]
+fn delete_module(_name: &str) -> std::io::Result<()> {
+    Err(std::io::Error::new(std::io::ErrorKind::Unsupported, "modules are unloaded only on the phone"))
+}
+
+/// Unload a kernel module by name; not loaded (`ENOENT`) is treated as success.
+pub fn unload(name: &str) -> Result<()> {
+    match delete_module(name) {
+        Ok(()) => Ok(()),
+        Err(e) if e.raw_os_error() == Some(libc::ENOENT) => Ok(()),
+        Err(e) => Err(e).with_context(|| format!("delete_module {name}")),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

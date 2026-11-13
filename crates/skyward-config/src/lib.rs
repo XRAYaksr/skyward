@@ -295,6 +295,11 @@ pub struct Modules {
     /// Partitions the phone keeps its kernel modules on, searched in order.
     #[serde(default = "default_module_sources")]
     pub sources: Vec<String>,
+    /// Modules first-stage init already loaded that must be unloaded before
+    /// loading `load` (for example when `vendor_boot` carries a copy without
+    /// `vendor_dlkm` dependencies).
+    #[serde(default)]
+    pub unload: Vec<String>,
     /// Modules the recovery loads at startup that first-stage init leaves
     /// out, such as the touchscreen driver. Dependencies come from the
     /// source's modules.dep and load first.
@@ -304,7 +309,7 @@ pub struct Modules {
 
 impl Default for Modules {
     fn default() -> Self {
-        Self { sources: default_module_sources(), load: Vec::new() }
+        Self { sources: default_module_sources(), unload: Vec::new(), load: Vec::new() }
     }
 }
 

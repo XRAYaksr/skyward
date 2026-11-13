@@ -510,6 +510,10 @@ fn bring_up(cfg: &DeviceConfig, slot: skyward_vab::Slot) -> Result<()> {
         let at = skyward_block::fstab::mount(name)?;
         skyward_sys::kmsg(&format!("{name} is mounted on {}", at.display()))?;
     }
+    for name in &cfg.modules.unload {
+        skyward_modules::unload(name)?;
+        skyward_sys::kmsg(&format!("unloaded {name}"))?;
+    }
     for path in load_modules(cfg, &cfg.modules.load)? {
         skyward_sys::kmsg(&format!("loaded {}", path.display()))?;
     }
