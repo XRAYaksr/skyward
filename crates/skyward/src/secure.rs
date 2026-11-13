@@ -110,11 +110,22 @@ pub fn prepare_hardware_directory(wanted: &[String]) -> Result<()> {
         fs::create_dir_all(fs_dir).with_context(|| format!("make {}", fs_dir.display()))?;
         mount_binderfs(fs_dir)?;
     }
-    let driver = Path::new(HARDWARE_DRIVER);
-    if !driver.exists() {
-        std::os::unix::fs::symlink(HARDWARE_DRIVER_NODE, driver)
-            .with_context(|| format!("point {HARDWARE_DRIVER} at {HARDWARE_DRIVER_NODE}"))?;
+    for (link, target) in [
+        ("/dev/binder", "/dev/binderfs/binder"),
+        ("/dev/vndbinder", "/dev/binderfs/vndbinder"),
+        (HARDWARE_DRIVER, HARDWARE_DRIVER_NODE),
+    ] {
+        let p = Path::new(link);
+        if !p.exists() && Path::new(target).exists() {
+            let _ = fs::remove_file(p);
+            std::os::unix::fs::symlink(target, p).with_context(|| format!("point {link} at {target}"))?;
+        }
+        if p.exists() {
+            fs::set_permissions(p, std::os::unix::fs::PermissionsExt::from_mode(0o666))
+                .with_context(|| format!("open {link} to every program"))?;
+        }
     }
+    let driver = Path::new(HARDWARE_DRIVER);
     // The system's own init opens the driver to every program, as it does
     // /dev/binder; a recovery's, which uses none of it, leaves it root's
     // alone, and the directory and the services that register with it run
@@ -251,7 +262,7 @@ pub fn publish_descriptions(wanted: &[String], files: &[String]) -> Result<usize
         take(from, &fs::read_to_string(from).with_context(|| format!("read {file}"))?)?;
     }
     let rewritten = say_framework(into)?;
-    if copied > 0 || rewritten > 0 {
+    if (copied > 0 || rewritten > 0) && Path::new(DIRECTORY_PROGRAM).exists() {
         // The directory reads the descriptions once and keeps to them, so
         // it has to start again to see these. It comes back knowing nothing
         // of what had registered with it, and nothing registers again by

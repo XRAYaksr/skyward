@@ -94,6 +94,15 @@ ready_property = "vendor.sys.listeners.registered"
 user = "root"
 groups = ["root", "drmrpc"]
 
+# The directory the phone's AIDL services register with. mondrian's stock
+# recovery carries none of it, so it runs from the installed system.
+[[service]]
+path = "/mnt/system/system/bin/servicemanager"
+libraries = ["/mnt/system/system/lib64/bootstrap", "/mnt/system/system/lib64", "/mnt/system_ext/lib64"]
+ready_property = "servicemanager.ready"
+user = "system"
+groups = ["system", "readproc"]
+
 # The key service, which is the only thing that can use the keys the phone
 # wrapped in hardware.
 [[service]]
