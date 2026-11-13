@@ -104,6 +104,12 @@ pub fn prepare_hardware_directory(wanted: &[String]) -> Result<()> {
         fs::remove_file(loader).with_context(|| format!("take away {}", loader.display()))?;
     }
     std::os::unix::fs::symlink(&from, loader).with_context(|| format!("point {} at {}", loader.display(), from.display()))?;
+    let node = Path::new(HARDWARE_DRIVER_NODE);
+    if !node.exists() {
+        let fs_dir = node.parent().expect("binderfs directory");
+        fs::create_dir_all(fs_dir).with_context(|| format!("make {}", fs_dir.display()))?;
+        mount_binderfs(fs_dir)?;
+    }
     let driver = Path::new(HARDWARE_DRIVER);
     if !driver.exists() {
         std::os::unix::fs::symlink(HARDWARE_DRIVER_NODE, driver)
@@ -357,4 +363,18 @@ fn answering_again(was: Option<u32>) -> Result<()> {
         }
         std::thread::sleep(std::time::Duration::from_millis(100));
     }
+}
+
+/// Mount `binderfs` at `dir` when the recovery's init did not mount it.
+fn mount_binderfs(dir: &Path) -> Result<()> {
+    use std::ffi::CString;
+    use std::os::unix::ffi::OsStrExt;
+    let source = CString::new("binder").expect("static");
+    let target = CString::new(dir.as_os_str().as_bytes()).context("a NUL in the binderfs path")?;
+    let fstype = CString::new("binder").expect("static");
+    let rc = unsafe { libc::mount(source.as_ptr(), target.as_ptr(), fstype.as_ptr(), 0, std::ptr::null()) };
+    if rc != 0 {
+        return Err(std::io::Error::last_os_error()).with_context(|| format!("mount binderfs on {}", dir.display()));
+    }
+    Ok(())
 }
