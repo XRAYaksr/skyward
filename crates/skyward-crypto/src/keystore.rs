@@ -72,7 +72,7 @@ impl StoredKey {
         if dir.join(FN_STRETCHING).exists() {
             let stretching = fs::read_to_string(dir.join(FN_STRETCHING))
                 .with_context(|| format!("read {}", dir.join(FN_STRETCHING).display()))?;
-            if stretching.trim() != "nopassword" {
+            if !matches!(stretching.trim(), "nopassword" | "none") {
                 bail!("{} was written by an Android too old for Skyward to read", dir.display());
             }
         }
