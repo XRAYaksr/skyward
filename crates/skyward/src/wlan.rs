@@ -707,8 +707,19 @@ fn place(file: &Firmware) -> Result<()> {
     fs::write(&to, bytes).with_context(|| format!("write {}", to.display()))
 }
 
+const WLAN_STUB_DIR: &str = "/skyward/run/wlan-lib";
+const BINDER_NDK_STUB: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/libbinder_ndk.so"));
+
 /// Start the supplicant on the interface, and wait for its control socket.
 fn start_supplicant(cfg: &Config, libraries: Option<&Path>) -> Result<Child> {
+    if cfg.libraries.iter().any(|d| d == WLAN_STUB_DIR) {
+        let dir = Path::new(WLAN_STUB_DIR);
+        fs::create_dir_all(dir).with_context(|| format!("make {}", dir.display()))?;
+        fs::set_permissions(dir, fs::Permissions::from_mode(0o755)).with_context(|| format!("open {}", dir.display()))?;
+        let stub = dir.join("libbinder_ndk.so");
+        fs::write(&stub, BINDER_NDK_STUB).with_context(|| format!("write {}", stub.display()))?;
+        fs::set_permissions(&stub, fs::Permissions::from_mode(0o755)).with_context(|| format!("chmod {}", stub.display()))?;
+    }
     let home = Path::new(HOME);
     let sockets = home.join("sockets");
     fs::create_dir_all(&sockets).with_context(|| format!("make {}", sockets.display()))?;
